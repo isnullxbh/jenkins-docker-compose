@@ -1,0 +1,31 @@
+networks:
+  jenkins-network:
+    name: jenkins-network
+
+volumes:
+  jenkins-data:
+    name: jenkins-data
+  jenkins-agent-0-data:
+    name: jenkins-agent-0-data
+
+services:
+  jenkins:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - jenkins-data:/var/jenkins_home
+    networks:
+      - jenkins-network
+    ports:
+      - "50000:50000"
+      - "8080:8080"
+
+  jenkins-node-0:
+    image: jenkins/ssh-agent:latest-jdk21
+    restart: unless-stopped
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=${SSH_PUB_KEY}
+    volumes:
+      - jenkins-agent-0-data:/home/jenkins/agent:rw
+    networks:
+      - jenkins-network
